@@ -27,20 +27,11 @@ class YoutubeChannel:
     def get_videos_info(self):
         if self.videos_html == "":
             self.videos_html = self.get_videos_html()
-
-        title_and_info = [
-            x.rsplit(" by ", 1)
-            for x in re.findall(
-                '(?<={"label":")[^}]*?(?="}\}\},"descriptionSnippet")', self.videos_html
-            )
-        ]
-
-        urls = re.findall('{"videoRenderer":{"videoId":"(.+?)",', self.videos_html)
-
-        return [
-            (x[0], re.search("views\ (.+?)\ ago", x[1]).groups()[0], self.base_url + y)
-            for x, y in zip(title_and_info, urls)
-        ]
+        
+        titles = re.findall('title":{"runs":\[{"text":"(.+?)"}\],"', self.videos_html)
+        ages = re.findall('"publishedTimeText":{"simpleText":"(.+?)\ ago"', self.videos_html)
+        urls = (self.base_url + x for x in re.findall('{"videoRenderer":{"videoId":"(.+?)",', self.videos_html))
+        return [(x,y,z) for x, y, z in zip(titles, ages, urls)]
 
 
 if __name__ == "__main__":
